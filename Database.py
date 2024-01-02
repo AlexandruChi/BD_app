@@ -9,7 +9,7 @@ class Database:
         )
         self.cursor = self.connection.cursor()
 
-    def get_hotel_data(self):
+    def get_hotels_data(self):
         hotels = []
         for row in self.cursor.execute(
                 'select id_hotel id, nume, nr_stele, scor, cod_regiune, locatie, nr_telefon, email '
