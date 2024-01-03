@@ -48,9 +48,16 @@ class HotelCard(tk.Frame):
         stars = tk.Label(
             location_card, text='⭐️ ' * hotel.stars, font=('Times New Roman', 20), justify=tk.LEFT, width=20, anchor='w'
         )
-        subdivision = pycountry.subdivisions.get(code=hotel.region)
-        location = tk.Label(location_card, )
+        subdivision = pycountry.subdivisions.get(code=hotel.region.strip())
+        location_string = ''
+        if subdivision is not None:
+            location_string = subdivision.country.name + ', ' + subdivision.name
+        if hotel.location is not None:
+            location_string = location_string + ', ' + hotel.location
+        location = tk.Label(location_card, text=location_string, font=('Times New Roman', 20))
         stars.pack(side=tk.LEFT)
+        location.pack(side=tk.LEFT)
+        location_card.pack(fill=tk.X)
 
 
 class HotelsFrame(tk.Frame):
