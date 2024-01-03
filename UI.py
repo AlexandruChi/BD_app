@@ -1,7 +1,6 @@
 import tkinter as tk
 import pycountry
 from Hotel import Hotel
-from Database import Database
 
 
 class App(tk.Tk):
@@ -34,7 +33,9 @@ class HotelCard(tk.Frame):
     def __init__(self, hotel: Hotel, master=None):
         super().__init__(master, borderwidth=5, relief='solid', padx=5, pady=5)
 
-        name_card = tk.Frame(self)
+        hotel_details = tk.Frame(self)
+
+        name_card = tk.Frame(hotel_details)
         flag = tk.Label(
             name_card, text=pycountry.countries.get(alpha_2=hotel.region[:2]).flag, font=('Times New Roman', 25)
         )
@@ -44,20 +45,37 @@ class HotelCard(tk.Frame):
         name.pack(side=tk.LEFT, padx=(0, 10))
         name_card.pack(fill=tk.X)
 
-        location_card = tk.Frame(self)
+        location_card = tk.Frame(hotel_details)
         stars = tk.Label(
             location_card, text='⭐️ ' * hotel.stars, font=('Times New Roman', 20), justify=tk.LEFT, width=20, anchor='w'
         )
         subdivision = pycountry.subdivisions.get(code=hotel.region.strip())
-        location_string = ''
         if subdivision is not None:
-            location_string = subdivision.country.name + ', ' + subdivision.name
+            location_string = subdivision.country.name
+            parent = subdivision.parent
+            parent_v = []
+            while parent is not None:
+                parent_v.append(parent.name)
+                parent = parent.parent
+            for subdivision_parent in reversed(parent_v):
+                location_string += ', ' + subdivision_parent.name
+            location_string += ', ' + subdivision.name
+        else:
+            location_string = hotel.region.strip()
         if hotel.location is not None:
-            location_string = location_string + ', ' + hotel.location
+            location_string += ', ' + hotel.location
         location = tk.Label(location_card, text=location_string, font=('Times New Roman', 20))
+
         stars.pack(side=tk.LEFT)
         location.pack(side=tk.LEFT)
         location_card.pack(fill=tk.X)
+
+        hotel_details.pack(side=tk.LEFT, fill=tk.X)
+
+        review_button = tk.Button(
+            self, text='Recenzii', font=('American Typewriter', 20), width=10
+        )
+        review_button.pack(side=tk.RIGHT, fill=tk.Y)
 
 
 class HotelsFrame(tk.Frame):

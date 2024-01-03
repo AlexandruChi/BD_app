@@ -12,19 +12,8 @@ class Database:
     def get_hotels_data(self):
         hotels = []
         for row in self.cursor.execute(
-                'select id_hotel id, nume, nr_stele, scor, cod_regiune, locatie, nr_telefon, email '
-                'from hoteluri '
-                '   join ('
-                '   select id_hotel, avg(rc.scor) scor '
-                '       from recenzii rc '
-                '           join rezervari rz using (id_rezervare) '
-                '           join camere_rezervate cr using (id_rezervare) '
-                '           join camere ca using (id_camera) '
-                '           join hoteluri ho using (id_hotel) '
-                '           join clienti cl using (id_client) '
-                '       group by id_hotel'
-                '   ) using (id_hotel)'
+                'select id_hotel id, nume, nr_stele, cod_regiune, locatie, nr_telefon, email from hoteluri'
         ):
-            hotels.append(Hotel(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7]))
+            hotels.append(Hotel(row[0], row[1], row[2], row[3], row[4], row[5], row[6]))
 
         return hotels
