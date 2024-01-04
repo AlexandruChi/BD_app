@@ -1,4 +1,5 @@
 import tkinter as tk
+import tkcalendar
 import pycountry
 from Hotel import Hotel
 
@@ -121,14 +122,14 @@ class ReviewCard(tk.Frame):
 
 
 class UserDetailsCard(tk.Frame):
-    def __init__(self, name: tk.StringVar, cnp: tk.StringVar, enter_command, bg='white', fg='black', master=None):
-        super().__init__(master, borderwidth=5, relief='solid', padx=5, pady=5, bg=bg)
+    def __init__(self, name: tk.StringVar, cnp: tk.StringVar, enter_command, master=None):
+        super().__init__(master, borderwidth=5, relief='solid', padx=5, pady=5)
 
         tk.Label(
-            self, text='Nume', bg=bg, fg=fg, font=('Times New Roman', 20), anchor='w', justify=tk.LEFT, width=5
+            self, text='Nume', font=('Times New Roman', 20), anchor='w', justify=tk.LEFT, width=5
         ).grid(row=0, column=0, padx=5, pady=5)
         tk.Label(
-            self, text='CNP', bg=bg, fg=fg, font=('Times New Roman', 20), anchor='w', justify=tk.LEFT, width=5
+            self, text='CNP', font=('Times New Roman', 20), anchor='w', justify=tk.LEFT, width=5
         ).grid(row=1, column=0, padx=5, pady=5)
 
         name_fild = tk.Entry(self, textvariable=name)
@@ -142,3 +143,30 @@ class UserDetailsCard(tk.Frame):
         tk.Button(
             self, text='Introduce', command=enter_command, font=('American Typewriter', 20)
         ).grid(row=2, column=1, padx=5, pady=5)
+
+
+class SelectDateCard(tk.Frame):
+    def __init__(self, master=None):
+        super().__init__(master, borderwidth=5, relief='solid', padx=5, pady=5)
+
+        tk.Label(
+            self, text='Check-in', font=('Times New Roman', 20)
+        ).grid(row=0, column=0, padx=5, pady=5)
+        tk.Label(
+            self, text='Check-out', font=('Times New Roman', 20)
+        ).grid(row=0, column=1, padx=5, pady=5)
+
+        self.check_in_fild = tkcalendar.Calendar(self, selectmode="day")
+        self.check_out_fild = tkcalendar.Calendar(self, selectmode="day")
+
+        self.check_in_fild.grid(row=1, column=0, padx=5)
+        self.check_out_fild.grid(row=1, column=1, padx=5)
+
+        self.button = tk.Button(self, text='Introduce', font=('American Typewriter', 20))
+        self.button.grid(row=2, column=0, columnspan=2, padx=5, pady=5)
+
+    def set_enter_command(self, enter_command):
+        self.button.configure(command=enter_command)
+
+    def get_date(self):
+        return self.check_in_fild.get_date(), self.check_out_fild.get_date()

@@ -65,3 +65,25 @@ class Database:
             reviews.append((row[0], row[1], row[2], row[3]))
 
         return reviews
+
+    def get_user_name(self, cnp):
+        for row in self.cursor.execute(
+            'select nume \
+            from clienti cl \
+            where cl.cnp = ' + cnp
+        ):
+            if row is None:
+                return False
+            return row[0]
+
+    def get_user_id(self, cnp):
+        for row in self.cursor.execute(
+            'select nume \
+            from clienti cl \
+            where cl.cnp = ' + cnp
+        ):
+            return row[0]
+
+    def add_user(self, name, cnp):
+        self.cursor.execute('insert into clienti values (NULL, \'' + str(name) + '\', \'' + str(cnp) + '\')')
+        self.connection.commit()

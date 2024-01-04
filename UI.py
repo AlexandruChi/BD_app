@@ -1,5 +1,5 @@
 import tkinter as tk
-from Cards import HotelCard, ScoreCard, ReviewCard, UserDetailsCard
+from Cards import HotelCard, ScoreCard, ReviewCard, UserDetailsCard, SelectDateCard
 from NavBar import NavBar
 
 
@@ -74,7 +74,7 @@ class ReservationFrame(AppFrame):
         self.db = db
         self.name = tk.StringVar()
         self.CNP = tk.StringVar()
-        self.reservation_frame = None
+        self.frame = None
         self.select_hotel()
 
     def select_hotel(self):
@@ -94,18 +94,56 @@ class ReservationFrame(AppFrame):
         self.enter_user_details()
 
     def enter_user_details(self):
-        if self.reservation_frame is not None:
-            self.reservation_frame.destroy()
-
-        self.reservation_frame = tk.Frame(self, bg=self.cget('bg'))
-        self.reservation_frame.grid_rowconfigure(0, weight=1)
-        self.reservation_frame.grid_columnconfigure(0, weight=1)
+        self.load_frame()
 
         UserDetailsCard(
-            master=self.reservation_frame, name=self.name, cnp=self.CNP, enter_command=None
+            master=self.frame, name=self.name, cnp=self.CNP, enter_command=lambda: self.check_user_details()
         ).grid(sticky='', row=0, column=0)
 
-        self.reservation_frame.pack(fill=tk.BOTH, expand=1)
+        self.pack_frame()
+
+    def check_user_details(self):
+        if len(self.CNP.get()) != 13 or not len(self.name.get()):
+            self.enter_user_details()
+            return
+
+        name = self.db.get_user_name(self.CNP.get())
+
+        if name is None:
+            self.db.add_user(self.name.get(), self.CNP.get())
+        elif self.name.get() != name:
+            self.enter_user_details()
+            return
+
+        self.enter_date()
+
+    def enter_date(self):
+        self.load_frame()
+
+        select_date = SelectDateCard(master=self.frame)
+        select_date.set_enter_command(lambda: self.check_date(select_date.get_date()))
+        select_date.grid(sticky='', row=0, column=0)
+
+        self.pack_frame()
+
+    def check_date(self, date):
+        pass
+
+    def select_rooms(self):
+        self.load_frame()
+
+        self.pack_frame()
+
+    def load_frame(self):
+        if self.frame is not None:
+            self.frame.destroy()
+
+        self.frame = tk.Frame(self, bg=self.cget('bg'))
+        self.frame.grid_rowconfigure(0, weight=1)
+        self.frame.grid_columnconfigure(0, weight=1)
+
+    def pack_frame(self):
+        self.frame.pack(fill=tk.BOTH, expand=1)
 
 
 class ManageFrame(AppFrame):
