@@ -1,5 +1,5 @@
 import tkinter as tk
-from HotelCard import HotelCard
+from HotelCard import HotelCard, ScoreCard
 from NavBar import NavBar
 
 
@@ -7,9 +7,11 @@ class App(tk.Tk):
     def __init__(self, db, geometry='960x600'):
         super().__init__()
         self.geometry(geometry)
-        #self.resizable(False, False)
+        self.minsize(width=960, height=600)
+        # self.resizable(False, False)
         self.db = db
-        hotels_frame = HotelsFrame(self.get_hotels(), master=self)
+
+        hotels_frame = HotelsFrame(self.db, master=self)
 
         NavBar((
             ('Hoteluri', lambda: hotels_frame.show_hotels()),
@@ -18,9 +20,6 @@ class App(tk.Tk):
         ), master=self).pack(fill=tk.X, padx=1, pady=1)
 
         hotels_frame.pack(fill=tk.BOTH, padx=10, pady=(0, 10), expand=True)
-
-    def get_hotels(self):
-        return self.db.get_hotels_data()
 
 
 class AppFrame(tk.Frame):
@@ -33,16 +32,17 @@ class AppFrame(tk.Frame):
 
 
 class HotelsFrame(AppFrame):
-    def __init__(self, hotels, master=None):
+    def __init__(self, db, master=None):
         super().__init__(master=master)
-        self.hotels = hotels
+        self.db = db
         self.show_hotels()
 
     def show_hotels(self):
         self.clear()
-        for i in range(len(self.hotels)):
+        hotels = self.db.get_hotels_data()
+        for i in range(len(hotels)):
             HotelCard(
-                self.hotels[i], ('Recenzii', lambda val=i: self.show_reviews(self.hotels[val])),
+                hotels[i], ('Recenzii', lambda val=i: self.show_reviews(hotels[val])),
                 'green', master=self
             ).pack(fill=tk.X, pady=(int(i != 0) * 10, 0))
 
@@ -51,3 +51,6 @@ class HotelsFrame(AppFrame):
         HotelCard(
             hotel, ('Înapoi', lambda: self.show_hotels()), 'gold', master=self
         ).pack(fill=tk.X)
+        ScoreCard(
+            self.db.get_hotel_score(hotel), self.db.get_hotel_nr_reviews(hotel), master=self
+        ).pack(fill=tk.X, pady=(10, 0))

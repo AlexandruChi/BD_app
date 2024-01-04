@@ -4,7 +4,7 @@ from Hotel import Hotel
 
 
 class HotelCard(tk.Frame):
-    def __init__(self, hotel: Hotel, option, option_colour, bg='white', fg='black',  master=None):
+    def __init__(self, hotel: Hotel, option, option_colour, bg='white', fg='black', master=None):
         super().__init__(master, borderwidth=5, relief='solid', padx=5, pady=5, bg=bg)
 
         hotel_details = tk.Frame(self, bg=bg)
@@ -54,3 +54,30 @@ class HotelCard(tk.Frame):
                 option_button, text=option[0], font=('American Typewriter', 20), width=10, command=option[1]
             ).pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
             option_button.pack(side=tk.RIGHT, fill=tk.Y)
+
+
+class ScoreCard(tk.Frame):
+    def __init__(self, score, nr_reviews, bg='white', fg='black', master=None):
+        super().__init__(master, borderwidth=5, relief='solid', padx=5, pady=5, bg=bg)
+
+        tk.Label(
+            self, text=f'{(score * 2):.1f} / 10', font=('Charter', 30), bg=bg, fg=fg, width=10
+        ).pack(fill=tk.X, padx=10, pady=10)
+
+        font = 'Charter'
+        size = 20
+
+        reviews_card = tk.Frame(self, bg=bg)
+        tk.Label(reviews_card, bg=bg, fg=fg, text=f'★★★★★ → {nr_reviews[5]}', font=(font, size)).pack()
+        tk.Label(reviews_card, bg=bg, fg=fg, text=f'★★★★☆ → {nr_reviews[4]}', font=(font, size)).pack()
+        tk.Label(reviews_card, bg=bg, fg=fg, text=f'★★★☆☆ → {nr_reviews[3]}', font=(font, size)).pack()
+        tk.Label(reviews_card, bg=bg, fg=fg, text=f'★★☆☆☆ → {nr_reviews[2]}', font=(font, size)).pack()
+        tk.Label(reviews_card, bg=bg, fg=fg, text=f'★☆☆☆☆ → {nr_reviews[1]}', font=(font, size)).pack()
+        tk.Label(reviews_card, bg=bg, fg=fg, text=f'☆☆☆☆☆ → {nr_reviews[0]}', font=(font, size)).pack()
+        reviews_card.pack(fill=tk.BOTH, expand=True, padx=10, pady=(0, 10))
+
+
+class ReviewCard(tk.Frame):
+    def __init__(self, bg='white', fg='black', master=None):
+        super().__init__(master, borderwidth=5, relief='solid', padx=5, pady=5, bg=bg)
+
