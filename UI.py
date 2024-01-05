@@ -3,6 +3,8 @@ from Cards import HotelCard, ScoreCard, ReviewCard, UserDetailsCard, SelectDateC
 from NavBar import NavBar
 from datetime import datetime
 
+DATE_FORMAT = "%d.%m.%Y"
+
 
 class App(tk.Tk):
     def __init__(self, db, geometry='960x600'):
@@ -77,8 +79,8 @@ class ReservationFrame(AppFrame):
         self.CNP = tk.StringVar()
         self.check_in = None
         self.check_out = None
-        self.nr_days = None
         self.hotel = None
+        self.rooms = None
         self.frame = None
         self.select_hotel()
 
@@ -111,33 +113,35 @@ class ReservationFrame(AppFrame):
         self.pack_frame()
 
     def check_date(self, date):
-        date_format = "%d.%m.%Y"
-        check_in = datetime.strptime(date[0], date_format).date()
-        check_out = datetime.strptime(date[1], date_format).date()
+        self.check_in = datetime.strptime(date[0], DATE_FORMAT).date()
+        self.check_out = datetime.strptime(date[1], DATE_FORMAT).date()
 
-        if check_in >= check_out:
+        if self.check_in >= self.check_out:
             self.enter_date()
             return
 
-        sysdate = datetime.strptime(self.db.get_sysdate(), date_format).date()
+        sysdate = datetime.strptime(self.db.get_sysdate(), DATE_FORMAT).date()
 
-        if sysdate > check_in:
+        if sysdate > self.check_in:
             self.enter_date()
             return
-
-        self.nr_days = (check_out - check_in).days
-
-        self.check_in = date[0]
-        self.check_out = date[1]
 
         self.select_rooms()
 
     def select_rooms(self):
         self.load_frame()
 
+        self.rooms = self.db.get_available_rooms(
+            self.hotel, self.check_in.strftime(DATE_FORMAT), self.check_out.strftime(DATE_FORMAT)
+        )
+        for room in self.rooms:
+            room.append(tk.StringVar())
+            room[-1].set(str(0))
+
         SelectRoomsCard(
-            master=self.frame, rooms=self.db.get_available_rooms(self.hotel, self.check_in, self.check_out),
-            nr_days=self.nr_days
+            master=self.frame, rooms=self.rooms,
+            nr_days=(self.check_out - self.check_in).days,
+            enter_command=lambda: self.enter_user_details()
         ).grid(sticky='', row=0, column=0)
 
         self.pack_frame()
@@ -164,7 +168,12 @@ class ReservationFrame(AppFrame):
             self.enter_user_details()
             return
 
-        self.enter_date()
+        self.confirm_reservation()
+
+    def confirm_reservation(self):
+        self.load_frame()
+
+        self.pack_frame()
 
     def load_frame(self):
         if self.frame is not None:

@@ -173,7 +173,7 @@ class SelectDateCard(tk.Frame):
 
 
 class SelectRoomsCard(tk.Frame):
-    def __init__(self, rooms, nr_days, master=None):
+    def __init__(self, rooms, nr_days, enter_command, master=None):
         super().__init__(master, borderwidth=5, relief='solid', padx=5, pady=5)
 
         tk.Label(
@@ -186,15 +186,11 @@ class SelectRoomsCard(tk.Frame):
             self, text='Preț cameră', font=('Times New Roman', 20), anchor='w', justify=tk.LEFT, width=15
         ).grid(row=2, column=0, padx=5, pady=5)
         tk.Button(
-            self, text='Rezervă', font=('American Typewriter', 20),
+            self, text='Introduce', font=('American Typewriter', 20), command=enter_command
         ).grid(row=3, column=0, padx=5, pady=5, sticky=tk.W)
-
-        selected_rooms = []
 
         i = 0
         for room in rooms:
-            selected_rooms.append(tk.StringVar())
-            selected_rooms[i].set(str(0))
             for c in range(2):
                 tk.Label(
                     self, text=str(room[c]), font=('Charter', 20), width=5
@@ -206,6 +202,13 @@ class SelectRoomsCard(tk.Frame):
             for val in range(room[3]):
                 options.append(str(val))
             tk.OptionMenu(
-                self, selected_rooms[i], *options
+                self, room[4], *options
             ).grid(row=3, column=i + 1, padx=5)
             i += 1
+
+
+class ReservationCard(tk.Frame):
+    def __init__(self, master=None):
+        super().__init__(master, borderwidth=5, relief='solid', padx=5, pady=5)
+
+

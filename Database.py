@@ -68,7 +68,7 @@ class Database:
             ) \
             order by data desc, scor desc, nume, detalii'
         ):
-            reviews.append((row[0], row[1], row[2], row[3]))
+            reviews.append([row[0], row[1], row[2], row[3]])
 
         return reviews
 
@@ -120,8 +120,8 @@ class Database:
                     group by id_camera \
                 ) \
             select \
-                ca.nr_persoane p, \
                 ca.nr_dormitoare d, \
+                ca.nr_persoane p, \
                 ca.pret, \
                 ca.nr_camere - NVL(( \
                     select nr from camere_ocupate where id = id_camera \
@@ -129,6 +129,6 @@ class Database:
             from camere ca \
             where id_hotel = ' + str(hotel.ID)
         ):
-            available_rooms.append((row[0], row[1], row[2], row[3]))
+            available_rooms.append([row[0], row[1], row[2], row[3]])
 
         return available_rooms
