@@ -170,3 +170,42 @@ class SelectDateCard(tk.Frame):
 
     def get_date(self):
         return self.check_in_fild.get_date(), self.check_out_fild.get_date()
+
+
+class SelectRoomsCard(tk.Frame):
+    def __init__(self, rooms, nr_days, master=None):
+        super().__init__(master, borderwidth=5, relief='solid', padx=5, pady=5)
+
+        tk.Label(
+            self, text='Nr. dormitoare', font=('Times New Roman', 20), anchor='w', justify=tk.LEFT, width=15
+        ).grid(row=0, column=0, padx=5, pady=5)
+        tk.Label(
+            self, text='Nr. persoane', font=('Times New Roman', 20), anchor='w', justify=tk.LEFT, width=15
+        ).grid(row=1, column=0, padx=5, pady=5)
+        tk.Label(
+            self, text='Preț cameră', font=('Times New Roman', 20), anchor='w', justify=tk.LEFT, width=15
+        ).grid(row=2, column=0, padx=5, pady=5)
+        tk.Button(
+            self, text='Rezervă', font=('American Typewriter', 20),
+        ).grid(row=3, column=0, padx=5, pady=5, sticky=tk.W)
+
+        selected_rooms = []
+
+        i = 0
+        for room in rooms:
+            selected_rooms.append(tk.StringVar())
+            selected_rooms[i].set(str(0))
+            for c in range(2):
+                tk.Label(
+                    self, text=str(room[c]), font=('Charter', 20), width=5
+                ).grid(row=c, column=i + 1, padx=5, pady=5)
+            tk.Label(
+                self, text=str(room[2] * nr_days), font=('Charter', 20), width=5
+            ).grid(row=2, column=i + 1, padx=5, pady=5)
+            options = []
+            for val in range(room[3]):
+                options.append(str(val))
+            tk.OptionMenu(
+                self, selected_rooms[i], *options
+            ).grid(row=3, column=i + 1, padx=5)
+            i += 1

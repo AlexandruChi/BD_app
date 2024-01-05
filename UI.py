@@ -1,6 +1,7 @@
 import tkinter as tk
-from Cards import HotelCard, ScoreCard, ReviewCard, UserDetailsCard, SelectDateCard
+from Cards import HotelCard, ScoreCard, ReviewCard, UserDetailsCard, SelectDateCard, SelectRoomsCard
 from NavBar import NavBar
+from datetime import datetime
 
 
 class App(tk.Tk):
@@ -74,24 +75,72 @@ class ReservationFrame(AppFrame):
         self.db = db
         self.name = tk.StringVar()
         self.CNP = tk.StringVar()
+        self.check_in = None
+        self.check_out = None
+        self.nr_days = None
+        self.hotel = None
         self.frame = None
         self.select_hotel()
 
     def select_hotel(self):
         self.clear()
+        self.hotel = None
         hotels = self.db.get_hotels_data()
         for i in range(len(hotels)):
             HotelCard(
-                hotels[i], ('Rezervă', lambda val=i: self.create_reservation(hotels[val])), 'green', master=self
+                hotels[i], ('Rezervă', lambda val=i: self.create_reservation(hotels[val])),
+                'green', master=self
             ).pack(pady=(int(i != 0) * 10, 0), fill=tk.X)
 
     def create_reservation(self, hotel):
         self.clear()
+        self.hotel = hotel
         HotelCard(
-            hotel, ('Anulare', lambda: self.select_hotel()), 'red', master=self
+            self.hotel, ('Anulare', lambda: self.select_hotel()), 'red', master=self
         ).pack(fill=tk.X)
 
-        self.enter_user_details()
+        self.enter_date()
+
+    def enter_date(self):
+        self.load_frame()
+
+        select_date = SelectDateCard(master=self.frame)
+        select_date.set_enter_command(lambda: self.check_date(select_date.get_date()))
+        select_date.grid(sticky='', row=0, column=0)
+
+        self.pack_frame()
+
+    def check_date(self, date):
+        date_format = "%d.%m.%Y"
+        check_in = datetime.strptime(date[0], date_format).date()
+        check_out = datetime.strptime(date[1], date_format).date()
+
+        if check_in >= check_out:
+            self.enter_date()
+            return
+
+        sysdate = datetime.strptime(self.db.get_sysdate(), date_format).date()
+
+        if sysdate > check_in:
+            self.enter_date()
+            return
+
+        self.nr_days = (check_out - check_in).days
+
+        self.check_in = date[0]
+        self.check_out = date[1]
+
+        self.select_rooms()
+
+    def select_rooms(self):
+        self.load_frame()
+
+        SelectRoomsCard(
+            master=self.frame, rooms=self.db.get_available_rooms(self.hotel, self.check_in, self.check_out),
+            nr_days=self.nr_days
+        ).grid(sticky='', row=0, column=0)
+
+        self.pack_frame()
 
     def enter_user_details(self):
         self.load_frame()
@@ -116,23 +165,6 @@ class ReservationFrame(AppFrame):
             return
 
         self.enter_date()
-
-    def enter_date(self):
-        self.load_frame()
-
-        select_date = SelectDateCard(master=self.frame)
-        select_date.set_enter_command(lambda: self.check_date(select_date.get_date()))
-        select_date.grid(sticky='', row=0, column=0)
-
-        self.pack_frame()
-
-    def check_date(self, date):
-        pass
-
-    def select_rooms(self):
-        self.load_frame()
-
-        self.pack_frame()
 
     def load_frame(self):
         if self.frame is not None:
