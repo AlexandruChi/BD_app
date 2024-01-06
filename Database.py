@@ -84,14 +84,14 @@ class Database:
 
     def get_user_id(self, cnp):
         for row in self.cursor.execute(
-            'select nume \
+            'select id_client \
             from clienti cl \
             where cl.cnp = ' + cnp
         ):
             return row[0]
 
     def add_user(self, name, cnp):
-        self.cursor.execute('insert into clienti values (NULL, \'' + str(name) + '\', \'' + str(cnp) + '\')')
+        self.cursor.execute('insert into clienti values (null, \'' + str(name) + '\', \'' + str(cnp) + '\')')
         self.connection.commit()
 
     def get_available_rooms(self, hotel, check_in, check_out):
@@ -132,3 +132,36 @@ class Database:
             available_rooms.append([row[0], row[1], row[2], row[3]])
 
         return available_rooms
+
+    def add_reservation(self, hotel, check_in, check_out, cnp, rooms):
+        user_id = self.get_user_id(cnp)
+        sysdate = self.get_sysdate()
+        self.cursor.execute(
+            'insert into rezervari values ( \
+               null, to_date(\'' + sysdate + '\', \'dd.mm.yyyy\'), to_date(\'' + check_in + '\', \'dd.mm.yyyy\'), \
+               to_date(\'' + check_out + '\', \'dd.mm.yyyy\'), ' + str(user_id) + '\
+            )'
+        )
+
+        reservation_id = None
+        for row in self.cursor.execute(
+            'select rezervari_id_rezervare_seq.currval from dual'
+        ):
+            reservation_id = row[0]
+
+        for room in rooms:
+            if room[4] != 0:
+                row = self.cursor.execute(
+                    'insert into camere_rezervate values (' + str(reservation_id) + ', (\
+                        select id_camera \
+                        from camere \
+                        where \
+                            nr_dormitoare = ' + str(room[0]) + ' and \
+                            nr_persoane = ' + str(room[1]) + ' and \
+                            id_hotel = ' + str(hotel.ID) + ' \
+                    ), ' + str(room[4]) + ')'
+                )
+
+        self.connection.commit()
+
+        return reservation_id

@@ -77,6 +77,7 @@ class ReservationFrame(AppFrame):
         self.db = db
         self.name = tk.StringVar()
         self.CNP = tk.StringVar()
+        self.reservation_id = None
         self.check_in = None
         self.check_out = None
         self.hotel = None
@@ -178,22 +179,29 @@ class ReservationFrame(AppFrame):
             self.enter_user_details()
             return
 
-        self.confirm_reservation()
+        self.show_reservation()
 
-    def confirm_reservation(self):
+    def show_reservation(self):
         self.load_frame()
 
         ReservationCard(
             master=self.frame, check_in=self.check_in.strftime(DATE_FORMAT),
             check_out=self.check_out.strftime(DATE_FORMAT),
             nr_days=(self.check_out - self.check_in).days, rooms=self.rooms, name=self.name.get(),
-            buttons=[('Rezervă', None)],
+            buttons=[('Rezervă', lambda: self.confirm_reservation())],
             borderwidth=5, relief='solid', padx=5, pady=5
         ).grid(sticky='', row=0, column=0)
 
         self.pack_frame()
 
-    def
+    def confirm_reservation(self):
+        for room in self.rooms:
+            room[4] = int(room[4].get())
+        self.reservation_id = self.db.add_reservation(
+            hotel=self.hotel, check_in=self.check_in.strftime(DATE_FORMAT),
+            check_out=self.check_out.strftime(DATE_FORMAT), cnp=self.CNP.get(), rooms=self.rooms
+        )
+        self.select_hotel()
 
     def load_frame(self):
         if self.frame is not None:
