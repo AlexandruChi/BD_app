@@ -2,9 +2,9 @@ import tkinter as tk
 import oracledb
 
 from Cards import (HotelCard, ScoreCard, ReviewCard, UserDetailsCard, SelectDateCard, RoomsCard, ReservationCard,
-                   MessageCard)
+                   MessageCard, SelectReservationCard)
 from NavBar import NavBar
-from datetime import datetime
+from datetime import datetime, timedelta
 
 DATE_FORMAT = "%d.%m.%Y"
 
@@ -197,6 +197,9 @@ class ReservationFrame(AppFrame):
     def show_reservation(self):
         self.load_frame()
 
+        for room in self.rooms:
+            room[3] = room[4].get()
+
         ReservationCard(
             master=self.frame, check_in=self.check_in.strftime(DATE_FORMAT),
             check_out=self.check_out.strftime(DATE_FORMAT),
@@ -254,6 +257,7 @@ class ManageFrame(AppFrame):
         self.db = db
         self.name = tk.StringVar()
         self.CNP = tk.StringVar()
+        self.reservation_id = tk.StringVar()
         self.reservations = None
         self.hotel = None
         self.select_hotel()
@@ -274,6 +278,8 @@ class ManageFrame(AppFrame):
         HotelCard(
             self.hotel, ('Înapoi', lambda: self.select_hotel()), 'gold', master=self
         ).pack(fill=tk.X)
+
+        self.enter_user_details()
 
     def enter_user_details(self):
         self.load_frame()
@@ -300,3 +306,47 @@ class ManageFrame(AppFrame):
 
         self.select_reservation()
 
+    def select_reservation(self):
+        self.load_frame()
+
+        SelectReservationCard(
+            master=self.frame, reservation_ids=self.reservations, selected=self.reservation_id,
+            button=('Selectare', lambda: self.check_reservations()),
+            borderwidth=5, relief='solid', padx=5, pady=5
+        ).grid(sticky='', row=0, column=0)
+
+        self.pack_frame()
+
+    def check_reservations(self):
+        val = self.reservation_id.get()
+        if val != '':
+            self.show_reservation()
+
+    def show_reservation(self):
+        self.load_frame()
+
+        reservation_data = self.db.get_reservation_data(self.reservation_id.get())
+
+        sysdate = datetime.strptime(self.db.get_sysdate(), DATE_FORMAT).date()
+        check_in = datetime.strptime(reservation_data[0], DATE_FORMAT).date()
+        check_out = datetime.strptime(reservation_data[1], DATE_FORMAT).date()
+
+        buttons = []
+
+        if check_in <= sysdate <= check_out + timedelta(days=7):
+            buttons.append(('Recenzie', lambda: self.add_review()))
+
+        ReservationCard(
+            master=self.frame, check_in=reservation_data[0],
+            check_out=reservation_data[1],
+            nr_days=(
+                    check_out - check_in
+            ).days, rooms=reservation_data[3], name=self.name.get(), total=reservation_data[2],
+            buttons=buttons, select=False,
+            borderwidth=5, relief='solid', padx=5, pady=5
+        ).grid(sticky='', row=0, column=0)
+
+        self.pack_frame()
+
+    def add_review(self):
+        pass

@@ -150,7 +150,7 @@ class Database:
 
         for room in rooms:
             if room[4] != 0:
-                row = self.cursor.execute(
+                self.cursor.execute(
                     'insert into camere_rezervate values (' + str(reservation_id) + ', (\
                         select id_camera \
                         from camere \
@@ -184,23 +184,33 @@ class Database:
 
         for row in self.cursor.execute(
             'select \
-                check_in, check_out \
+                to_char(check_in, \'dd.mm.yyyy\'), \
+                to_char(check_out, \'dd.mm.yyyy\') \
+            from rezervari rz \
+            where id_rezervare = ' + str(reservation_id)
+        ):
+            reservation_data.append(row[0])
+            reservation_data.append(row[1])
+
+        for row in self.cursor.execute(
+            'select \
                 sum(ca.pret * cz.nr_camere * (rz.check_out - rz.check_in)) total \
             from camere_rezervate cz \
                 join camere ca using (id_camera) \
                 join rezervari rz using (id_rezervare) \
-            group by id_rezervare'
+            where id_rezervare = ' + str(reservation_id)
         ):
-            reservation_data.append((row[0], row[1], row[2]))
+            reservation_data.append(row[0])
 
         rooms = []
         for row in self.cursor.execute(
             'select \
                 ca.nr_dormitoare, ca.nr_persoane, \
-                ca.pret * cz.nr_camere * (rz.check_out - rz.check_in) pret \
+                ca.pret * cz.nr_camere * (rz.check_out - rz.check_in) pret, \
                 cz.nr_camere \
-            from camere_rezervate ca \
+            from camere_rezervate cz \
                 join camere ca using (id_camera) \
+                join rezervari rz using (id_rezervare) \
             where id_rezervare = ' + str(reservation_id)
         ):
             rooms.append((row[0], row[1], row[2], row[3]))

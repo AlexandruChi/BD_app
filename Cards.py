@@ -224,13 +224,13 @@ class RoomsCard(tk.Frame):
                 ).grid(row=3, column=i + 1, padx=5)
             else:
                 tk.Label(
-                    self, text=str(room[4].get()), font=('Charter', 20), width=5
+                    self, text=str(room[3]), font=('Charter', 20), width=5
                 ).grid(row=3, column=i + 1, padx=5)
             i += 1
 
 
 class ReservationCard(tk.Frame):
-    def __init__(self, name, check_in, check_out, nr_days, rooms, buttons, master=None, **kw):
+    def __init__(self, name, check_in, check_out, nr_days, rooms, buttons, total=None, master=None, **kw):
         super().__init__(master)
 
         self.config(
@@ -273,16 +273,18 @@ class ReservationCard(tk.Frame):
 
         options_frame = tk.Frame(master=self, borderwidth=5, relief='groove', padx=5, pady=5)
         i = 0
-        for button in buttons:
-            tk.Button(
-                options_frame, text=button[0], command=button[1], font=('American Typewriter', 20)
-            ).grid(row=0, column=i, sticky='w')
-            i += 1
+        if buttons is not None:
+            for button in buttons:
+                tk.Button(
+                    options_frame, text=button[0], command=button[1], font=('American Typewriter', 20)
+                ).grid(row=0, column=i, sticky='w')
+                i += 1
         options_frame.grid(row=2, column=0, columnspan=2, padx=2.5, pady=2.5, sticky='nsew')
 
-        total = 0
-        for room in rooms:
-            total += room[2] * int(room[4].get()) * nr_days
+        if total is None:
+            total = 0
+            for room in rooms:
+                total += room[2] * room[3] * nr_days
 
         total_frame = tk.Frame(master=self, borderwidth=5, relief='groove', padx=5, pady=5)
         total_frame.rowconfigure(0, weight=1)
@@ -320,4 +322,21 @@ class SelectReservationCard(tk.Frame):
             borderwidth=kw.get('borderwidth'), relief=kw.get('relief'), padx=kw.get('padx'), pady=kw.get('pady')
         )
 
-        tk.Label()
+        self.rowconfigure(0, weight=1)
+        self.rowconfigure(1, weight=1)
+        self.rowconfigure(2, weight=1)
+        self.columnconfigure(0, weight=1)
+
+        tk.Label(
+            master=self, text='Rezervare nr.', font=('Times New Roman', 20)
+        ).grid(row=0, column=0, padx=5, pady=5, sticky='')
+
+        options = []
+        for val in reservation_ids:
+            options.append(str(val))
+
+        tk.OptionMenu(self, selected, *options).grid(row=1, column=0, padx=5, sticky='')
+
+        tk.Button(
+            master=self, text=button[0], command=button[1], font=('American Typewriter', 20)
+        ).grid(row=2, column=0, padx=5, pady=5, sticky='')
