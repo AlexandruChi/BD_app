@@ -92,7 +92,6 @@ class Database:
 
     def add_user(self, name, cnp):
         self.cursor.execute('insert into clienti values (null, \'' + str(name) + '\', \'' + str(cnp) + '\')')
-        self.connection.commit()
 
     def get_available_rooms(self, hotel, check_in, check_out):
         available_rooms = []
@@ -165,3 +164,47 @@ class Database:
         self.connection.commit()
 
         return reservation_id
+
+    def get_reservations(self, hotel, user_id):
+        reservations = []
+
+        for row in self.cursor.execute(
+            'select distinct id_rezervare \
+            from rezervari rz \
+                join camere_rezervate cz using (id_rezervare) \
+                join camere ca using (id_camera) \
+            where id_hotel = ' + str(hotel.ID) + ' and id_client = ' + str(user_id)
+        ):
+            reservations.append(row[0])
+
+        return reservations
+
+    def get_reservation_data(self, reservation_id):
+        reservation_data = []
+
+        for row in self.cursor.execute(
+            'select \
+                check_in, check_out \
+                sum(ca.pret * cz.nr_camere * (rz.check_out - rz.check_in)) total \
+            from camere_rezervate cz \
+                join camere ca using (id_camera) \
+                join rezervari rz using (id_rezervare) \
+            group by id_rezervare'
+        ):
+            reservation_data.append((row[0], row[1], row[2]))
+
+        rooms = []
+        for row in self.cursor.execute(
+            'select \
+                ca.nr_dormitoare, ca.nr_persoane, \
+                ca.pret * cz.nr_camere * (rz.check_out - rz.check_in) pret \
+                cz.nr_camere \
+            from camere_rezervate ca \
+                join camere ca using (id_camera) \
+            where id_rezervare = ' + str(reservation_id)
+        ):
+            rooms.append((row[0], row[1], row[2], row[3]))
+
+        reservation_data.append(rooms)
+
+        return reservation_data

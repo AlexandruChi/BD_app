@@ -113,7 +113,7 @@ class ReviewCard(tk.Frame):
         for review in reviews:
             reviews_frame.insert(
                 tk.END, str(review[0]) + ' ' + '★' * review[1] + '☆' * (5 - review[1]) + ' ' +
-                str(review[2]) + ':\n' + str(review[3]) + '\n\n'
+                        str(review[2]) + ':\n' + str(review[3]) + '\n\n'
             )
 
         reviews_frame.config(state="disabled")
@@ -291,3 +291,33 @@ class ReservationCard(tk.Frame):
             total_frame, text='Total: ' + str(total), font=('American Typewriter', 20)
         ).grid(row=0, column=0, padx=5, pady=5, sticky='')
         total_frame.grid(row=2, column=2, padx=2.5, pady=2.5, sticky='nsew')
+
+
+class MessageCard(tk.Frame):
+    def __init__(self, message, button, master=None, **kw):
+        super().__init__(master)
+
+        self.config(
+            borderwidth=kw.get('borderwidth'), relief=kw.get('relief'), padx=kw.get('padx'), pady=kw.get('pady')
+        )
+
+        self.rowconfigure(0, weight=1)
+        tk.Label(
+            self, text=message, font=('American Typewriter', 25)
+        ).grid(row=0, column=0, padx=5, pady=5, sticky='')
+        if button is not None:
+            self.rowconfigure(1, weight=0)
+            tk.Button(
+                self, text=button[0], command=button[1], font=('American Typewriter', 20)
+            ).grid(row=1, column=0, padx=5, pady=5, sticky='')
+
+
+class SelectReservationCard(tk.Frame):
+    def __init__(self, reservation_ids, selected, button, master=None, **kw):
+        super().__init__(master)
+
+        self.config(
+            borderwidth=kw.get('borderwidth'), relief=kw.get('relief'), padx=kw.get('padx'), pady=kw.get('pady')
+        )
+
+        tk.Label()
