@@ -122,8 +122,12 @@ class ReviewCard(tk.Frame):
 
 
 class UserDetailsCard(tk.Frame):
-    def __init__(self, name: tk.StringVar, cnp: tk.StringVar, enter_command, master=None):
-        super().__init__(master, borderwidth=5, relief='solid', padx=5, pady=5)
+    def __init__(self, name: tk.StringVar, cnp: tk.StringVar, enter_command, master=None, **kw):
+        super().__init__(master)
+
+        self.config(
+            borderwidth=kw.get('borderwidth'), relief=kw.get('relief'), padx=kw.get('padx'), pady=kw.get('pady')
+        )
 
         tk.Label(
             self, text='Nume', font=('Times New Roman', 20), anchor='w', justify=tk.LEFT, width=5
@@ -146,8 +150,12 @@ class UserDetailsCard(tk.Frame):
 
 
 class SelectDateCard(tk.Frame):
-    def __init__(self, master=None):
-        super().__init__(master, borderwidth=5, relief='solid', padx=5, pady=5)
+    def __init__(self, master=None, **kw):
+        super().__init__(master)
+
+        self.config(
+            borderwidth=kw.get('borderwidth'), relief=kw.get('relief'), padx=kw.get('padx'), pady=kw.get('pady')
+        )
 
         tk.Label(
             self, text='Check-in', font=('Times New Roman', 20)
@@ -172,9 +180,13 @@ class SelectDateCard(tk.Frame):
         return self.check_in_fild.get_date(), self.check_out_fild.get_date()
 
 
-class SelectRoomsCard(tk.Frame):
-    def __init__(self, rooms, nr_days, enter_command, master=None):
-        super().__init__(master, borderwidth=5, relief='solid', padx=5, pady=5)
+class RoomsCard(tk.Frame):
+    def __init__(self, rooms, nr_days, enter_command=None, select=False, master=None, **kw):
+        super().__init__(master)
+
+        self.config(
+            borderwidth=kw.get('borderwidth'), relief=kw.get('relief'), padx=kw.get('padx'), pady=kw.get('pady')
+        )
 
         tk.Label(
             self, text='Nr. dormitoare', font=('Times New Roman', 20), anchor='w', justify=tk.LEFT, width=15
@@ -185,9 +197,14 @@ class SelectRoomsCard(tk.Frame):
         tk.Label(
             self, text='Preț cameră', font=('Times New Roman', 20), anchor='w', justify=tk.LEFT, width=15
         ).grid(row=2, column=0, padx=5, pady=5)
-        tk.Button(
-            self, text='Introduce', font=('American Typewriter', 20), command=enter_command
-        ).grid(row=3, column=0, padx=5, pady=5, sticky=tk.W)
+        if select:
+            tk.Button(
+                self, text='Introduce', font=('American Typewriter', 20), command=enter_command
+            ).grid(row=3, column=0, padx=5, pady=5, sticky=tk.W)
+        else:
+            tk.Label(
+                self, text='Nr. camere', font=('Times New Roman', 20), anchor='w', justify=tk.LEFT, width=15
+            ).grid(row=3, column=0, padx=5, pady=5)
 
         i = 0
         for room in rooms:
@@ -198,17 +215,79 @@ class SelectRoomsCard(tk.Frame):
             tk.Label(
                 self, text=str(room[2] * nr_days), font=('Charter', 20), width=5
             ).grid(row=2, column=i + 1, padx=5, pady=5)
-            options = []
-            for val in range(room[3]):
-                options.append(str(val))
-            tk.OptionMenu(
-                self, room[4], *options
-            ).grid(row=3, column=i + 1, padx=5)
+            if select:
+                options = []
+                for val in range(room[3]):
+                    options.append(str(val))
+                tk.OptionMenu(
+                    self, room[4], *options
+                ).grid(row=3, column=i + 1, padx=5)
+            else:
+                tk.Label(
+                    self, text=str(room[4].get()), font=('Charter', 20), width=5
+                ).grid(row=3, column=i + 1, padx=5)
             i += 1
 
 
 class ReservationCard(tk.Frame):
-    def __init__(self, master=None):
-        super().__init__(master, borderwidth=5, relief='solid', padx=5, pady=5)
+    def __init__(self, name, check_in, check_out, nr_days, rooms, buttons, master=None, **kw):
+        super().__init__(master)
 
+        self.config(
+            borderwidth=kw.get('borderwidth'), relief=kw.get('relief'), padx=kw.get('padx'), pady=kw.get('pady')
+        )
 
+        self.rowconfigure(0, weight=0)
+        self.rowconfigure(1, weight=1)
+        self.rowconfigure(2, weight=1)
+
+        self.columnconfigure(0, weight=0)
+        self.columnconfigure(1, weight=1)
+        self.columnconfigure(2, weight=0)
+
+        name_frame = tk.Frame(master=self, borderwidth=5, relief='groove', padx=5, pady=5)
+        name_frame.rowconfigure(0, weight=1)
+        name_frame.columnconfigure(0, weight=1)
+        tk.Label(name_frame, text=name, font=('Snell Roundhand', 20)).grid(row=0, column=0, padx=5, pady=5, sticky='')
+        name_frame.grid(row=0, column=0, padx=2.5, pady=2.5, sticky='nsew')
+
+        date_frame = tk.Frame(master=self, borderwidth=5, relief='groove', padx=5, pady=5)
+        date_frame.rowconfigure(0, weight=1)
+        date_frame.rowconfigure(1, weight=1)
+        date_frame.columnconfigure(0, weight=1)
+        tk.Label(
+            date_frame, text=check_in, font=('Charter', 20)
+        ).grid(row=0, column=0, padx=5, pady=5, sticky='ews')
+        tk.Label(
+            date_frame, text=check_out, font=('Charter', 20)
+        ).grid(row=1, column=0, padx=5, pady=5, sticky='ewn')
+        date_frame.grid(row=1, column=0, padx=2.5, pady=2.5, sticky='nsew')
+
+        rooms_frame = tk.Frame(master=self, borderwidth=5, relief='groove', padx=5, pady=5)
+        rooms_frame.rowconfigure(0, weight=1)
+        rooms_frame.columnconfigure(1, weight=1)
+        RoomsCard(
+            master=rooms_frame, nr_days=nr_days, rooms=rooms,
+        ).grid(row=0, column=0, rowspan=2, columnspan=2, padx=5, pady=5, sticky='')
+        rooms_frame.grid(row=0, column=1, rowspan=2, columnspan=2, padx=2.5, pady=2.5, sticky='nsew')
+
+        options_frame = tk.Frame(master=self, borderwidth=5, relief='groove', padx=5, pady=5)
+        i = 0
+        for button in buttons:
+            tk.Button(
+                options_frame, text=button[0], command=button[1], font=('American Typewriter', 20)
+            ).grid(row=0, column=i, sticky='w')
+            i += 1
+        options_frame.grid(row=2, column=0, columnspan=2, padx=2.5, pady=2.5, sticky='nsew')
+
+        total = 0
+        for room in rooms:
+            total += room[2] * int(room[4].get()) * nr_days
+
+        total_frame = tk.Frame(master=self, borderwidth=5, relief='groove', padx=5, pady=5)
+        total_frame.rowconfigure(0, weight=1)
+        total_frame.columnconfigure(0, weight=1)
+        tk.Label(
+            total_frame, text='Total: ' + str(total), font=('American Typewriter', 20)
+        ).grid(row=0, column=0, padx=5, pady=5, sticky='')
+        total_frame.grid(row=2, column=2, padx=2.5, pady=2.5, sticky='nsew')

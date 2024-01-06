@@ -1,5 +1,5 @@
 import tkinter as tk
-from Cards import HotelCard, ScoreCard, ReviewCard, UserDetailsCard, SelectDateCard, SelectRoomsCard
+from Cards import HotelCard, ScoreCard, ReviewCard, UserDetailsCard, SelectDateCard, RoomsCard, ReservationCard
 from NavBar import NavBar
 from datetime import datetime
 
@@ -106,7 +106,7 @@ class ReservationFrame(AppFrame):
     def enter_date(self):
         self.load_frame()
 
-        select_date = SelectDateCard(master=self.frame)
+        select_date = SelectDateCard(master=self.frame, borderwidth=5, relief='solid', padx=5, pady=5)
         select_date.set_enter_command(lambda: self.check_date(select_date.get_date()))
         select_date.grid(sticky='', row=0, column=0)
 
@@ -138,19 +138,29 @@ class ReservationFrame(AppFrame):
             room.append(tk.StringVar())
             room[-1].set(str(0))
 
-        SelectRoomsCard(
-            master=self.frame, rooms=self.rooms,
+        RoomsCard(
+            master=self.frame, rooms=self.rooms, select=True,
             nr_days=(self.check_out - self.check_in).days,
-            enter_command=lambda: self.enter_user_details()
+            enter_command=lambda: self.check_rooms(),
+            borderwidth=5, relief='solid', padx=5, pady=5
         ).grid(sticky='', row=0, column=0)
 
         self.pack_frame()
+
+    def check_rooms(self):
+        for room in self.rooms:
+            if int(room[4].get()) != 0:
+                self.enter_user_details()
+                return
+
+        self.select_rooms()
 
     def enter_user_details(self):
         self.load_frame()
 
         UserDetailsCard(
-            master=self.frame, name=self.name, cnp=self.CNP, enter_command=lambda: self.check_user_details()
+            master=self.frame, name=self.name, cnp=self.CNP, enter_command=lambda: self.check_user_details(),
+            borderwidth=5, relief='solid', padx=5, pady=5
         ).grid(sticky='', row=0, column=0)
 
         self.pack_frame()
@@ -173,7 +183,17 @@ class ReservationFrame(AppFrame):
     def confirm_reservation(self):
         self.load_frame()
 
+        ReservationCard(
+            master=self.frame, check_in=self.check_in.strftime(DATE_FORMAT),
+            check_out=self.check_out.strftime(DATE_FORMAT),
+            nr_days=(self.check_out - self.check_in).days, rooms=self.rooms, name=self.name.get(),
+            buttons=[('Rezervă', None)],
+            borderwidth=5, relief='solid', padx=5, pady=5
+        ).grid(sticky='', row=0, column=0)
+
         self.pack_frame()
+
+    def
 
     def load_frame(self):
         if self.frame is not None:
