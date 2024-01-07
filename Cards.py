@@ -113,7 +113,7 @@ class ReviewCard(tk.Frame):
         for review in reviews:
             reviews_frame.insert(
                 tk.END, str(review[0]) + ' ' + '★' * review[1] + '☆' * (5 - review[1]) + ' ' +
-                        str(review[2]) + ':\n' + str(review[3]) + '\n\n'
+                str(review[2]) + ':\n' + str(review[3]) + '\n\n'
             )
 
         reviews_frame.config(state="disabled")
@@ -273,12 +273,13 @@ class ReservationCard(tk.Frame):
         rooms_frame.grid(row=0, column=1, rowspan=2, columnspan=2, padx=2.5, pady=2.5, sticky='nsew')
 
         options_frame = tk.Frame(master=self, borderwidth=5, relief='groove', padx=5, pady=5)
+        options_frame.rowconfigure(0, weight=1)
         i = 0
         if buttons is not None:
             for button in buttons:
                 tk.Button(
                     options_frame, text=button[0], command=button[1], font=('American Typewriter', 20)
-                ).grid(row=0, column=i, sticky='w')
+                ).grid(row=0, column=i, sticky='nsw')
                 i += 1
         options_frame.grid(row=2, column=0, columnspan=2, padx=2.5, pady=2.5, sticky='nsew')
 
@@ -324,20 +325,82 @@ class SelectReservationCard(tk.Frame):
         )
 
         self.rowconfigure(0, weight=1)
-        self.rowconfigure(1, weight=1)
-        self.rowconfigure(2, weight=1)
+
+        if len(reservation_ids) == 0:
+            tk.Label(
+                master=self, text='Nu există rezervări', font=('Times New Roman', 20)
+            ).grid(row=0, column=0, padx=5, pady=5, sticky='')
+        else:
+            self.rowconfigure(1, weight=1)
+            self.rowconfigure(2, weight=1)
+            self.columnconfigure(0, weight=1)
+
+            tk.Label(
+                master=self, text='Rezervare nr.', font=('Times New Roman', 20)
+            ).grid(row=0, column=0, padx=5, pady=5, sticky='')
+
+            options = []
+            for val in reservation_ids:
+                options.append(str(val))
+
+            tk.OptionMenu(self, selected, *options).grid(row=1, column=0, padx=5, sticky='')
+
+            tk.Button(
+                master=self, text=button[0], command=button[1], font=('American Typewriter', 20)
+            ).grid(row=2, column=0, padx=5, pady=5, sticky='')
+
+
+class ManageReviewCard(tk.Frame):
+    def __init__(self, score, master=None, **kw):
+        super().__init__(master)
+
+        self.config(
+            borderwidth=kw.get('borderwidth'), relief=kw.get('relief'), padx=kw.get('padx'), pady=kw.get('pady')
+        )
+
         self.columnconfigure(0, weight=1)
+        self.columnconfigure(1, weight=0)
+        self.columnconfigure(2, weight=0)
 
         tk.Label(
-            master=self, text='Rezervare nr.', font=('Times New Roman', 20)
-        ).grid(row=0, column=0, padx=5, pady=5, sticky='')
+            master=self, text='Recenzie', font=('Times New Roman', 20)
+        ).grid(row=0, column=0, columnspan=3, padx=5, pady=5, sticky='')
 
-        options = []
-        for val in reservation_ids:
-            options.append(str(val))
+        review_frame = tk.Frame(self)
+        scrollbar = tk.Scrollbar(review_frame, orient=tk.VERTICAL)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
-        tk.OptionMenu(self, selected, *options).grid(row=1, column=0, padx=5, sticky='')
+        self.review = tk.Text(
+            master=review_frame, font=('Times New Roman', 20), wrap=tk.WORD, height=7, width=50,
+            yscrollcommand=scrollbar.set
+        )
+        scrollbar.config(command=self.review.yview)
+        self.review.focus_set()
+        self.review.pack(fill=tk.BOTH, expand=True)
+        review_frame.grid(row=1, column=0, columnspan=3, padx=5, pady=5, sticky='')
 
-        tk.Button(
-            master=self, text=button[0], command=button[1], font=('American Typewriter', 20)
-        ).grid(row=2, column=0, padx=5, pady=5, sticky='')
+        tk.Label(
+            self, text='Scor:', font=('Times New Roman', 20)
+        ).grid(row=2, column=1, padx=5, pady=5, sticky='')
+
+        sores = []
+        for val in range(6):
+            sores.append(str(val))
+        tk.OptionMenu(
+            self, score, *sores
+        ).grid(row=2, column=2, padx=5, pady=5, sticky='')
+
+    def add_buttons(self, buttons):
+        options_frame = tk.Frame(master=self)
+        options_frame.rowconfigure(0, weight=1)
+        i = 0
+        if buttons is not None:
+            for button in buttons:
+                tk.Button(
+                    options_frame, text=button[0], command=button[1], font=('American Typewriter', 20)
+                ).grid(row=0, column=i, sticky='nsw')
+                i += 1
+        options_frame.grid(row=2, column=0, padx=5, pady=5, sticky='nsew')
+
+    def get_text(self):
+        return self.review.get('1.0', 'end-1c')

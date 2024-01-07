@@ -213,8 +213,35 @@ class Database:
                 join rezervari rz using (id_rezervare) \
             where id_rezervare = ' + str(reservation_id)
         ):
-            rooms.append((row[0], row[1], row[2], row[3]))
+            rooms.append([row[0], row[1], row[2], row[3]])
 
         reservation_data.append(rooms)
 
         return reservation_data
+
+    def get_review(self, reservation_id):
+        review = None
+        for row in self.cursor.execute(
+            'select \
+                scor, \
+                detalii \
+            from recenzii \
+            where id_rezervare = ' + str(reservation_id)
+        ):
+            review = [row[0], row[1]]
+
+        return review
+
+    def add_review(self, reservation_id, review):
+        sysdate = self.get_sysdate()
+        review_string = 'null'
+        if review[1] is not None:
+            review_string = '\'' + review[1] + '\''
+
+        self.cursor.execute(
+            'insert into recenzii values( \
+                ' + str(reservation_id) + ', ' + str(review[0]) + ', \
+                            to_date(\'' + sysdate + '\', \'dd.mm.yyyy\'), ' + review_string + ' \
+                        )'
+        )
+        self.connection.commit()

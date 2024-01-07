@@ -2,7 +2,7 @@ import tkinter as tk
 import oracledb
 
 from Cards import (HotelCard, ScoreCard, ReviewCard, UserDetailsCard, SelectDateCard, RoomsCard, ReservationCard,
-                   MessageCard, SelectReservationCard)
+                   MessageCard, SelectReservationCard, ManageReviewCard)
 from NavBar import NavBar
 from datetime import datetime, timedelta
 
@@ -96,6 +96,7 @@ class ReservationFrame(AppFrame):
         self.check_out = None
         self.hotel = None
         self.rooms = None
+
         self.select_hotel()
 
     def select_hotel(self):
@@ -304,8 +305,6 @@ class ManageFrame(AppFrame):
 
         self.reservations = self.db.get_reservations(self.hotel, self.db.get_user_id(self.CNP.get()))
 
-
-
         self.select_reservation()
 
     def select_reservation(self):
@@ -330,6 +329,7 @@ class ManageFrame(AppFrame):
         self.load_frame()
 
         reservation_data = self.db.get_reservation_data(self.reservation_id.get())
+        review = self.db.get_review(int(self.reservation_id.get()))
 
         sysdate = datetime.strptime(self.db.get_sysdate(), DATE_FORMAT).date()
         check_in = datetime.strptime(reservation_data[0], DATE_FORMAT).date()
@@ -338,7 +338,7 @@ class ManageFrame(AppFrame):
         buttons = []
 
         if check_in <= sysdate <= check_out + timedelta(days=7):
-            buttons.append(('Recenzie', lambda: self.add_review()))
+            buttons.append(('Recenzie', lambda: self.manage_review(review)))
 
         ReservationCard(
             master=self.frame, check_in=reservation_data[0],
@@ -352,5 +352,64 @@ class ManageFrame(AppFrame):
 
         self.pack_frame()
 
-    def add_review(self):
-        pass
+    def manage_review(self, review):
+        self.load_frame()
+
+        score = tk.StringVar()
+        score.set('5')
+
+        card = ManageReviewCard(
+            master=self.frame, score=score,
+            borderwidth=5, relief='solid', padx=5, pady=5
+        )
+
+        buttons = []
+        if review is None:
+            buttons = [('Creare', lambda: self.check_review((int(score.get()), card.get_text())))]
+        else:
+            buttons.append(('Salvare', lambda: self.change_review((int(score.get()), card.get_text()))))
+            buttons.append(('Șterge', lambda: self.delete_review((int(score.get()), card.get_text()))))
+            score.set(review[0])
+
+        card.add_buttons(buttons)
+
+        card.grid(sticky='', row=0, column=0)
+
+        self.pack_frame()
+
+    def check_review(self, review):
+        try:
+            self.db.add_review(self.reservation_id.get(), review)
+        except oracledb.Error:
+            self.error()
+            return
+
+        self.show_reservation()
+
+    def change_review(self, review):
+        try:
+            self.db.add_review(self.reservation_id.get(), review)
+        except oracledb.Error:
+            self.error()
+            return
+
+        self.show_reservation()
+
+    def delete_review(self, review):
+        try:
+            self.db.add_review(self.reservation_id.get(), review)
+        except oracledb.Error:
+            self.error()
+            return
+
+        self.show_reservation()
+
+    def error(self):
+        self.load_frame()
+
+        MessageCard(
+            master=self.frame, message='Eroare', button=None,
+            borderwidth=5, relief='solid', padx=5, pady=5
+        ).grid(sticky='', row=0, column=0)
+
+        self.pack_frame()
