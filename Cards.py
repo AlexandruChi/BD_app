@@ -213,8 +213,12 @@ class RoomsCard(tk.Frame):
                     tk.Label(
                         self, text=str(room[c]), font=('Charter', 20), width=5
                     ).grid(row=c, column=i + 1, padx=5, pady=5)
+                if select:
+                    total = room[2] * nr_days
+                else:
+                    total = room[2]
                 tk.Label(
-                    self, text=str(room[2] * nr_days), font=('Charter', 20), width=5
+                    self, text=str(total), font=('Charter', 20), width=5
                 ).grid(row=2, column=i + 1, padx=5, pady=5)
                 if select:
                     options = []
@@ -389,7 +393,7 @@ class ManageReviewCard(tk.Frame):
 
         if not edit:
             tk.Label(
-                self, text=score.get(), font=('Charter', 30)
+                self, text=score.get(), font=('Charter', 20)
             ).grid(row=2, column=2, padx=5, pady=5, sticky='')
         else:
             sores = []
@@ -415,4 +419,6 @@ class ManageReviewCard(tk.Frame):
         return self.review.get('1.0', 'end-1c')
 
     def set_text(self, text):
+        self.review.config(state="normal")
         self.review.insert('1.0', text)
+        self.review.config(state="disabled")

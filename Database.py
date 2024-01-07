@@ -184,7 +184,8 @@ class Database:
             from rezervari rz \
                 join camere_rezervate cz using (id_rezervare) \
                 join camere ca using (id_camera) \
-            where id_hotel = ' + str(hotel.ID) + ' and id_client = ' + str(user_id)
+            where id_hotel = ' + str(hotel.ID) + ' and id_client = ' + str(user_id) + ' \
+            order by id_rezervare desc'
         ):
             reservations.append(row[0])
 

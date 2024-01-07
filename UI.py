@@ -337,10 +337,11 @@ class ManageFrame(AppFrame):
 
         buttons = []
 
-        if check_in <= sysdate <= check_out + timedelta(days=7):
-            buttons.append(('Recenzie', lambda: self.manage_review(review, True)))
-        else:
-            buttons.append(('Recenzie', lambda: self.manage_review(review, False)))
+        if check_in <= sysdate:
+            if sysdate <= check_out + timedelta(days=7):
+                buttons.append(('Recenzie', lambda: self.manage_review(review, True)))
+            else:
+                buttons.append(('Recenzie', lambda: self.manage_review(review, False)))
 
         ReservationCard(
             master=self.frame, check_in=reservation_data[0],
@@ -358,7 +359,11 @@ class ManageFrame(AppFrame):
         self.load_frame()
 
         score = tk.StringVar()
-        score.set('5')
+
+        if review is not None:
+            score.set(str(review[0]))
+        else:
+            score.set('5')
 
         card = ManageReviewCard(
             master=self.frame, score=score, edit=edit,
@@ -373,9 +378,9 @@ class ManageFrame(AppFrame):
             else:
                 buttons.append(('Salvare', lambda: self.change_review((int(score.get()), card.get_text()))))
                 buttons.append(('Șterge', lambda: self.delete_review()))
-                score.set(review[0])
-                if review[1] is not None:
-                    card.set_text(review[1])
+
+        if review is not None and review[1] is not None:
+            card.set_text(review[1])
 
         buttons.append(('Înapoi', lambda: self.show_reservation()))
 
