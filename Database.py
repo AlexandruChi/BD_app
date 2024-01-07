@@ -135,6 +135,17 @@ class Database:
     def add_reservation(self, hotel, check_in, check_out, cnp, rooms):
         user_id = self.get_user_id(cnp)
         sysdate = self.get_sysdate()
+
+        self.cursor.execute(
+            'delete from rezervari \
+            where id_rezervare = ( \
+                select id_rezervare \
+                from rezervari \
+                    left join camere_rezervate using (id_rezervare) \
+                where nr_camere is null and id_client = ' + str(user_id) + ' \
+            )'
+        )
+
         self.cursor.execute(
             'insert into rezervari values ( \
                null, to_date(\'' + sysdate + '\', \'dd.mm.yyyy\'), to_date(\'' + check_in + '\', \'dd.mm.yyyy\'), \
@@ -243,5 +254,28 @@ class Database:
                 ' + str(reservation_id) + ', ' + str(review[0]) + ', \
                             to_date(\'' + sysdate + '\', \'dd.mm.yyyy\'), ' + review_string + ' \
                         )'
+        )
+        self.connection.commit()
+
+    def update_review(self, reservation_id, review):
+        sysdate = self.get_sysdate()
+        review_string = 'null'
+        if review[1] is not None:
+            review_string = '\'' + review[1] + '\''
+
+        self.cursor.execute(
+            'update recenzii \
+            set \
+                scor = ' + str(review[0]) + ', \
+                data = to_date(\'' + sysdate + '\', \'dd.mm.yyyy\'), \
+                detalii = ' + review_string + ' \
+            where id_rezervare = ' + str(reservation_id)
+        )
+        self.connection.commit()
+
+    def delete_review(self, reservation_id):
+        self.cursor.execute(
+            'delete from recenzii \
+            where id_rezervare = ' + str(reservation_id)
         )
         self.connection.commit()

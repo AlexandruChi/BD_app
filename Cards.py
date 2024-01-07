@@ -351,7 +351,7 @@ class SelectReservationCard(tk.Frame):
 
 
 class ManageReviewCard(tk.Frame):
-    def __init__(self, score, master=None, **kw):
+    def __init__(self, score, edit, master=None, **kw):
         super().__init__(master)
 
         self.config(
@@ -375,6 +375,10 @@ class ManageReviewCard(tk.Frame):
             yscrollcommand=scrollbar.set
         )
         scrollbar.config(command=self.review.yview)
+
+        if not edit:
+            self.review.config(state="disabled")
+
         self.review.focus_set()
         self.review.pack(fill=tk.BOTH, expand=True)
         review_frame.grid(row=1, column=0, columnspan=3, padx=5, pady=5, sticky='')
@@ -383,12 +387,17 @@ class ManageReviewCard(tk.Frame):
             self, text='Scor:', font=('Times New Roman', 20)
         ).grid(row=2, column=1, padx=5, pady=5, sticky='')
 
-        sores = []
-        for val in range(6):
-            sores.append(str(val))
-        tk.OptionMenu(
-            self, score, *sores
-        ).grid(row=2, column=2, padx=5, pady=5, sticky='')
+        if not edit:
+            tk.Label(
+                self, text=score.get(), font=('Charter', 30)
+            ).grid(row=2, column=2, padx=5, pady=5, sticky='')
+        else:
+            sores = []
+            for val in range(6):
+                sores.append(str(val))
+            tk.OptionMenu(
+                self, score, *sores
+            ).grid(row=2, column=2, padx=5, pady=5, sticky='')
 
     def add_buttons(self, buttons):
         options_frame = tk.Frame(master=self)
@@ -404,3 +413,6 @@ class ManageReviewCard(tk.Frame):
 
     def get_text(self):
         return self.review.get('1.0', 'end-1c')
+
+    def set_text(self, text):
+        self.review.insert('1.0', text)
