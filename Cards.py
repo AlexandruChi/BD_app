@@ -208,25 +208,26 @@ class RoomsCard(tk.Frame):
 
         i = 0
         for room in rooms:
-            for c in range(2):
+            if select or room[3] != 0:
+                for c in range(2):
+                    tk.Label(
+                        self, text=str(room[c]), font=('Charter', 20), width=5
+                    ).grid(row=c, column=i + 1, padx=5, pady=5)
                 tk.Label(
-                    self, text=str(room[c]), font=('Charter', 20), width=5
-                ).grid(row=c, column=i + 1, padx=5, pady=5)
-            tk.Label(
-                self, text=str(room[2] * nr_days), font=('Charter', 20), width=5
-            ).grid(row=2, column=i + 1, padx=5, pady=5)
-            if select:
-                options = []
-                for val in range(room[3]):
-                    options.append(str(val))
-                tk.OptionMenu(
-                    self, room[4], *options
-                ).grid(row=3, column=i + 1, padx=5)
-            else:
-                tk.Label(
-                    self, text=str(room[3]), font=('Charter', 20), width=5
-                ).grid(row=3, column=i + 1, padx=5)
-            i += 1
+                    self, text=str(room[2] * nr_days), font=('Charter', 20), width=5
+                ).grid(row=2, column=i + 1, padx=5, pady=5)
+                if select:
+                    options = []
+                    for val in range(room[3]):
+                        options.append(str(val))
+                    tk.OptionMenu(
+                        self, room[4], *options
+                    ).grid(row=3, column=i + 1, padx=5)
+                else:
+                    tk.Label(
+                        self, text=str(room[3]), font=('Charter', 20), width=5
+                    ).grid(row=3, column=i + 1, padx=5)
+                i += 1
 
 
 class ReservationCard(tk.Frame):

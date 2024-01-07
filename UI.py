@@ -136,7 +136,7 @@ class ReservationFrame(AppFrame):
 
         sysdate = datetime.strptime(self.db.get_sysdate(), DATE_FORMAT).date()
 
-        if sysdate > self.check_in:
+        if sysdate > self.check_in + timedelta(days=1):
             self.enter_date()
             return
 
@@ -198,7 +198,7 @@ class ReservationFrame(AppFrame):
         self.load_frame()
 
         for room in self.rooms:
-            room[3] = room[4].get()
+            room[3] = int(room[4].get())
 
         ReservationCard(
             master=self.frame, check_in=self.check_in.strftime(DATE_FORMAT),
@@ -304,10 +304,14 @@ class ManageFrame(AppFrame):
 
         self.reservations = self.db.get_reservations(self.hotel, self.db.get_user_id(self.CNP.get()))
 
+
+
         self.select_reservation()
 
     def select_reservation(self):
         self.load_frame()
+
+        self.reservation_id = tk.StringVar()
 
         SelectReservationCard(
             master=self.frame, reservation_ids=self.reservations, selected=self.reservation_id,
