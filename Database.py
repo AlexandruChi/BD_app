@@ -169,7 +169,7 @@ class Database:
                             nr_dormitoare = ' + str(room[0]) + ' and \
                             nr_persoane = ' + str(room[1]) + ' and \
                             id_hotel = ' + str(hotel.ID) + ' \
-                    ), ' + str(room[4]) + ')'
+                    ), ' + str(room[3]) + ')'
                 )
 
         self.connection.commit()
@@ -218,7 +218,7 @@ class Database:
         for row in self.cursor.execute(
             'select \
                 ca.nr_dormitoare, ca.nr_persoane, \
-                ca.pret * cz.nr_camere * (rz.check_out - rz.check_in) pret, \
+                ca.pret * (rz.check_out - rz.check_in) pret, \
                 cz.nr_camere \
             from camere_rezervate cz \
                 join camere ca using (id_camera) \

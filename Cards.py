@@ -290,7 +290,7 @@ class ReservationCard(tk.Frame):
         if total is None:
             total = 0
             for room in rooms:
-                total += room[2] * room[3] * nr_days
+                total += room[2] * room[3]
 
         total_frame = tk.Frame(master=self, borderwidth=5, relief='groove', padx=5, pady=5)
         total_frame.rowconfigure(0, weight=1)
@@ -366,6 +366,8 @@ class ManageReviewCard(tk.Frame):
         self.columnconfigure(1, weight=0)
         self.columnconfigure(2, weight=0)
 
+        self.edit = edit
+
         tk.Label(
             master=self, text='Recenzie', font=('Times New Roman', 20)
         ).grid(row=0, column=0, columnspan=3, padx=5, pady=5, sticky='')
@@ -421,4 +423,5 @@ class ManageReviewCard(tk.Frame):
     def set_text(self, text):
         self.review.config(state="normal")
         self.review.insert('1.0', text)
-        self.review.config(state="disabled")
+        if not self.edit:
+            self.review.config(state="disabled")

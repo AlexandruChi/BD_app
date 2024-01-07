@@ -19,6 +19,9 @@ class App(tk.Tk):
         self.db = db
         self.frame = None
 
+        self.name = tk.StringVar()
+        self.CNP = tk.StringVar()
+
         NavBar((
             ('Hoteluri', lambda: self.show_frame(HotelsFrame)),
             ('Creare Rezervare', lambda: self.show_frame(ReservationFrame)),
@@ -30,7 +33,7 @@ class App(tk.Tk):
     def show_frame(self, frame):
         if self.frame is not None:
             self.frame.destroy()
-        self.frame = frame(self.db, master=self)
+        self.frame = frame(self.db, master=self, name=self.name, cnp=self.CNP)
         self.frame.pack(fill=tk.BOTH, padx=10, pady=(0, 10), expand=True)
 
 
@@ -56,7 +59,7 @@ class AppFrame(tk.Frame):
 
 
 class HotelsFrame(AppFrame):
-    def __init__(self, db, master=None):
+    def __init__(self, db, master=None, **kw):
         super().__init__(master=master)
         self.db = db
         self.show_hotels()
@@ -87,15 +90,15 @@ class HotelsFrame(AppFrame):
 
 
 class ReservationFrame(AppFrame):
-    def __init__(self, db, master=None):
+    def __init__(self, db, name, cnp, master=None):
         super().__init__(master=master)
         self.db = db
-        self.name = tk.StringVar()
-        self.CNP = tk.StringVar()
         self.check_in = None
         self.check_out = None
         self.hotel = None
         self.rooms = None
+        self.name = name
+        self.CNP = cnp
 
         self.select_hotel()
 
@@ -198,13 +201,16 @@ class ReservationFrame(AppFrame):
     def show_reservation(self):
         self.load_frame()
 
+        nr_days = (self.check_out - self.check_in).days
+
         for room in self.rooms:
             room[3] = int(room[4].get())
+            room[2] = room[2] * nr_days
 
         ReservationCard(
             master=self.frame, check_in=self.check_in.strftime(DATE_FORMAT),
             check_out=self.check_out.strftime(DATE_FORMAT),
-            nr_days=(self.check_out - self.check_in).days, rooms=self.rooms, name=self.name.get(),
+            nr_days=nr_days, rooms=self.rooms, name=self.name.get(),
             buttons=[('Rezervă', lambda: self.confirm_reservation())],
             borderwidth=5, relief='solid', padx=5, pady=5
         ).grid(sticky='', row=0, column=0)
@@ -253,14 +259,15 @@ class ReservationFrame(AppFrame):
 
 
 class ManageFrame(AppFrame):
-    def __init__(self, db, master=None):
+    def __init__(self, db, name, cnp, master=None):
         super().__init__(master=master)
         self.db = db
-        self.name = tk.StringVar()
-        self.CNP = tk.StringVar()
         self.reservation_id = tk.StringVar()
         self.reservations = None
         self.hotel = None
+        self.name = name
+        self.CNP = cnp
+
         self.select_hotel()
 
     def select_hotel(self):
